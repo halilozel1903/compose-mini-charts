@@ -96,7 +96,9 @@ raw = zlib.decompress(idat)
 # Filtered scanlines of a blank screen are almost all zeros; real content has many different bytes.
 distinct = len(set(raw[::97]))
 nonzero = sum(1 for b in raw[::211] if b) / max(1, len(raw[::211]))
-if width < 300 or height < 300 or distinct < 24 or nonzero < 0.01:
+# A light screen with a sparse chart filters to mostly zeros too, so a low non-zero share only
+# counts as blank when the content also has few distinct bytes.
+if width < 300 or height < 300 or distinct < 24 or (nonzero < 0.01 and distinct < 120):
     sys.exit(f"{path}: looks blank ({width}x{height}, {distinct} distinct samples, {nonzero:.3f} non-zero)")
 print(f"{path}: {width}x{height}, {len(data) // 1024} KB, {distinct} distinct samples")
 PY
